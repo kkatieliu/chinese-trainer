@@ -4,10 +4,18 @@ from utils import load_words, load_ratings, save_ratings, list_word_files
 GROUP_SIZE = 20
 
 class Trainer:
-    def __init__(self, ratings_file):
+    def __init__(self, ratings_file, word_files=None):
         self.ratings_file = ratings_file
         self.ratings = load_ratings(ratings_file)
-        self.word_files = list_word_files()
+
+        # Accept either a single filename, a list of filenames, or None to auto-discover
+        if isinstance(word_files, str):
+            self.word_files = [word_files]
+        elif isinstance(word_files, (list, tuple)) and word_files:
+            self.word_files = list(word_files)
+        else:
+            self.word_files = list_word_files()
+
         self.groups = self._build_groups()
 
     def _build_groups(self):
@@ -89,13 +97,22 @@ class Trainer:
         i = 0
         while i < len(selected):
             file, w = selected[i]
-            print(f"Character: {w['char']}  ({file})")
+            # Show pinyin first if the source CSV listed pinyin before the character
+            if w.get("source_order") == "pinyin-first":
+                print(f"Pinyin: {w['pinyin']}  ({file})")
+            else:
+                print(f"Character: {w['char']}  ({file})")
+
             cmd = input("Press Enter to reveal, or type 'next' to exit: ").strip().lower()
             if cmd in ["next", "n"]:
                 print("\nReturning to main menu...\n")
                 return
 
-            print(f" → {w['pinyin']} = {w['english']}\n")
+            # Reveal the other side
+            if w.get("source_order") == "pinyin-first":
+                print(f" → {w['char']} = {w['english']}\n")
+            else:
+                print(f" → {w['pinyin']} = {w['english']}\n")
 
             # Get rating safely
             while True:

@@ -1,10 +1,17 @@
 from trainer import Trainer
+import argparse
+
 
 def main():
+    parser = argparse.ArgumentParser(description="Chinese Vocabulary Trainer")
+    parser.add_argument("--words", "--words-file", dest="words_file", help="Path to words CSV file to use (optional)")
+    parser.add_argument("--ratings", dest="ratings_file", default="ratings.json", help="Ratings JSON file (default: ratings.json)")
+    args = parser.parse_args()
+
     print("=== Chinese Vocabulary Trainer ===\n")
     print("loading trainer...")
 
-    trainer = Trainer("ratings.json")
+    trainer = Trainer(args.ratings_file, word_files=args.words_file)
     print("trainer loaded!") 
 
     while True:
